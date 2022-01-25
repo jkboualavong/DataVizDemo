@@ -128,6 +128,10 @@ plot.presentation = function (){ # Based on bbc_style(), then modified for style
       )
 }
 
+# Set figure widths and heights
+fig.width = 5.3
+fig.height = 4.7
+
 ```
 
 # Scatter plot with fit line
@@ -307,14 +311,16 @@ ggplot() +
   # Labels: the expression() function allows for sub/superscripts and italics as needed
   labs(x = expression("Imidazole p"*italic(K)*""[a]), 
        y = expression(italic(K)[Carbamate]*", 25"^o*"C"),
-       subtitle = 'Paper Setting', title = 'Equilibrium Constants are Correlated') + 
+       subtitle = 'Paper Theme', title = 'Example: Labeled Scatterplot') + 
   scale_y_continuous(limits = c(0, 12), breaks = c(0, 3, 6, 9, 12)) +
   # Apply the paper theme
   plot.paper()
-ggsave(filename = 'Figures/01ScatterExample.jpg', width = 8, height = 6, dpi = 300)
-ggsave(filename = 'Figures/01ScatterExample.pdf', width = 8, height = 6, dpi = 300)
-ggsave(filename = 'Figures/01ScatterExample.png', width = 8, height = 6, dpi = 300)
-ggsave(filename = 'Figures/01ScatterExample.svg', width = 8, height = 6, dpi = 300)
+ggsave(filename = 'Figures/01ScatterExample.pdf', 
+       width = fig.width, height = fig.height, dpi = 300, units = 'in')
+ggsave(filename = 'Figures/01ScatterExample.png', 
+       width = fig.width, height = fig.height, dpi = 300, units = 'in')
+ggsave(filename = 'Figures/01ScatterExample.svg', 
+       width = fig.width, height = fig.height, dpi = 300, units = 'in')
 ```
 
 ```{r Clear data}
@@ -374,6 +380,7 @@ Notes:
 * Asymmetrically adjusting the y-axis needs to be done with the 'expand = expansion(mult = c(a, b))' setting in the y-scale. The first number of 'mult' variable ('a') is the lower bound expansion (0 if none) and 'b' is the upper bound.
 * Switching the location of the facet label (ie. from the top and right side to the bottom or left side) is done with by using the 'switch' input to 'facet_grid' or 'facet_wrap'. When switching them, I recommend applying 'theme(strip.placement = "outside")' to ensure that they are outside of the axis labels (this is already included in the 'plot.paper()' and 'plot.presentation()' themes).
 * The panels (subplots) may be too close. Adjust them with 'theme(panel.spacing.y = unit(), panel.spacing.x = unit())', where 'unit()' takes a number followed by the units it should refer to. I recommend applying this after setting the theme functions, as the font sizes have a substantial impact on them. It will also look different if the dimensions of the exported figure are different.
+* 'scale_fill_manual(values, labels)' can be used to set color palettes ('values', See: http://sape.inf.usi.ch/sites/default/files/ggplot2-colour-names.png for a list of built-in color names.) as well as adjust labels manually. When adjusting labels, unless linked together in a list, the labels are listed alphabetically.
 
 ```{r Multi-column plot adjustments}
 # Bar width
@@ -415,27 +422,37 @@ ggplot(data) +
   scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +
   labs(subtitle = 'y-axis scale, y-facet label switch, strip placement = "inside"')
 
-# Apply global theme for paper
+# Apply color palette and the paper formatting option.
+color.palette = c('chartreuse4', 'orangered2', 'darkorchid')
 ggplot(data) +
   # Base figure
-  geom_col(mapping = aes(x = sample, y = error.rate, fill = sample)) +
-  geom_errorbar(mapping = aes(x = sample, y = error.rate, 
-    ymin = error.rate - error.sd, ymax = error.rate + error.sd), width = bar.width) +
+  geom_col(mapping = aes(x = sample, y = error.rate*100, fill = sample)) +
+  geom_errorbar(mapping = aes(x = sample, y = error.rate*100, 
+    ymin = (error.rate - error.sd)*100, ymax = (error.rate + error.sd)*100), 
+    width = bar.width) +
+  scale_fill_manual(values = color.palette,
+    # Label adjustment: note that they are specified because they are not in order
+                    labels = c('Sample 3' = 'Random',
+                               'Sample 2' = 'Adaptive',
+                               'Sample 1' = 'Grid')) + 
   facet_rep_grid(test.sys~model, repeat.tick.labels = TRUE, switch = 'y') +
-  labs(x = 'Sample', y = 'Error Rate', fill = NULL) +
+  labs(x = 'Sampling Method', y = 'Error %', fill = NULL) +
   # Legend position and x-labels
-  plot.paper() +
+  plot.presentation() +
   theme(legend.position = 'bottom', legend.direction = 'horizontal',
         panel.spacing.y = unit(0.3, "cm"),
         panel.spacing.x = unit(0.1, "cm"),) +
   scale_x_discrete(labels = NULL, breaks = NULL) +
   # y scale
   scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +
-  labs(subtitle = 'Applying the Paper Theme + Panel Padding')
-ggsave(filename = 'Figures/02BarplotExample.jpg', width = 8, height = 6, dpi = 300)
-ggsave(filename = 'Figures/02BarplotExample.pdf', width = 8, height = 6, dpi = 300)
-ggsave(filename = 'Figures/02BarplotExample.png', width = 8, height = 6, dpi = 300)
-ggsave(filename = 'Figures/02BarplotExample.svg', width = 8, height = 6, dpi = 300)
+  labs(title = 'Example: Multi-bar Plot + Faceted Subplots',
+       subtitle = 'Presentation Theme')
+ggsave(filename = 'Figures/02BarplotExample.pdf', 
+       width = fig.width*1.3, height = fig.height*1.3, dpi = 300, units = 'in')
+ggsave(filename = 'Figures/02BarplotExample.png', 
+       width = fig.width*1.3, height = fig.height*1.3, dpi = 300, units = 'in')
+ggsave(filename = 'Figures/02BarplotExample.svg', 
+       width = fig.width*1.3, height = fig.height*1.3, dpi = 300, units = 'in')
 
 ```
 
@@ -596,7 +613,7 @@ g2 + g3 + g1 + plot_layout(guides = "collect", nrow = 2)
 # Example placing a spacer so the final figure is shifted by 1
 g2 + g3 + plot_spacer() + g1 + plot_layout(guides = "collect", nrow = 2)
 
-## Hiding a legend, paper presentation mode
+## Hiding a legend, paper presentation mode.
 g1 = ggplot(data) +
   geom_contour(mapping = aes(x = input1, y = input2, z = output1), 
                size = 1, color = 'red', bins = nbin) +
@@ -619,12 +636,17 @@ g3 = ggplot(data) +
   scale_y_continuous(expand = expansion(mult = bound.expand)) +
   coord_fixed() +
   scale_fill_brewer(palette = 'Greys') + plot.paper()
-# As before, but the red legend has been eliminated
-g2 + g3 + plot_spacer() + g1 + plot_layout(guides = "collect", nrow = 2)
-ggsave(filename = 'Figures/03HeatmapExample.jpg', width = 8, height = 6, dpi = 300)
-ggsave(filename = 'Figures/03HeatmapExample.pdf', width = 8, height = 6, dpi = 300)
-ggsave(filename = 'Figures/03HeatmapExample.png', width = 8, height = 6, dpi = 300)
-ggsave(filename = 'Figures/03HeatmapExample.svg', width = 8, height = 6, dpi = 300)
+# As before, but the red legend has been eliminated. The plot annotation
+# function allows for a total figure title; otherwise, the title is
+# specific to a single subplot
+g2 + g3 + plot_spacer() + g1 + plot_layout(guides = "collect", nrow = 2) +
+  plot_annotation(subtitle = 'Example Heatmap/Contour + Patchwork')
+ggsave(filename = 'Figures/03HeatmapExample.pdf', 
+       width = fig.width, height = fig.height, dpi = 300, units = 'in')
+ggsave(filename = 'Figures/03HeatmapExample.png', 
+       width = fig.width, height = fig.height, dpi = 300, units = 'in')
+ggsave(filename = 'Figures/03HeatmapExample.svg', 
+       width = fig.width, height = fig.height, dpi = 300, units = 'in')
 
 rm(g1, g2, g3)
 ```
