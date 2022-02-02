@@ -84,7 +84,9 @@ plot.paper = function (){ # Based on bbc_style(), then modified for style
       # Strip (facet or subplot) settings
       strip.background = ggplot2::element_rect(fill = 'white', linetype = 1),
       strip.text       = ggplot2::element_text(size = sz.small, hjust = 0.5),
-      strip.placement  = 'outside'
+      strip.placement  = 'outside',
+      # Aspect ratio: for papers, typically 3x4
+      aspect.ratio     = 3/4
       )
 }
 
@@ -124,13 +126,19 @@ plot.presentation = function (){ # Based on bbc_style(), then modified for style
       # Strip (facet or subplot) settings
       strip.background = ggplot2::element_rect(fill = 'white', linetype = 1),
       strip.text       = ggplot2::element_text(size = sz.small, hjust = 0.5),
-      strip.placement  = 'outside'
+      strip.placement  = 'outside',
+      # Aspect ratio: for papers, typically prefer 4/9
+      aspect.ratio     = 4/9
       )
 }
 
-# Set figure widths and heights
-fig.width = 5.3
-fig.height = 4.7
+# Set figure widths and heights for paper exports
+fig.pap.width = 4*1.4
+fig.pap.height = 3*1.4
+
+# Set figure widths and heights for presentation exports
+fig.pre.width = 8*1.4
+fig.pre.height = 4*1.4
 
 ```
 
@@ -176,7 +184,7 @@ ggplot() +
   geom_line(data = fit.plot, mapping = aes(x = x, y = y), color = "red") +
   geom_point(data = points, mapping = aes(x = pka, y = Keq.C25), color = "black") +
   # Labeling
-  labs(x = 'y-axis label', y = 'y-axis label', subtitle = 'subtitle', title = 'title')
+  labs(x = 'x-axis label', y = 'y-axis label', subtitle = 'subtitle', title = 'title')
 
 ```
 
@@ -186,11 +194,13 @@ Note that the default setting has:
 * grid lines for the x- and y-axes
 
 These are all manipulated with the 'theme()' function, which can be added on at the end.
-There are also a number of pre-set themes such as 'theme_bw()' and 'theme_classic()'. However, for this, I constructed my own theme as 'plot.paper()' and 'plot.presentation()' as settings for papers and presentations, respectively, based on my style preferences.
+There are also a number of pre-set setting such as 'theme_bw()' and 'theme_classic()'. However, for this, I constructed my own setting function as 'plot.paper()' and 'plot.presentation()' as settings for papers and presentations, respectively, based on my style preferences.
+
+You can use the function 'View()' to look at the underlying code for a built-in function (eg. 'View(theme_bw)') gives you the underlying code for this theme function. This can be useful for seeing how the built-in themes work so you can build your own.
 
 ## Manipulating the figure
 
-Demo of the code to make a labeled figure, showing it for both the presentation and paper themes.
+Demo of the code to make a labeled figure, showing it for both the presentation and paper settings.
 Note that the only difference between the code for these two figures is the last line ('plot.presentation()' vs 'plot.paper()') and the values of the size variables ('ptsz' and 'label.sz').
 
 To obtain only labels for the selected points (those with the 'adj' variables), I use the 'filter()' function from the 'dplyr' package.
@@ -237,7 +247,8 @@ ggplot() +
             hjust = filter(points, !is.na(adj.x))$hjust,
             size = label.sz) +
   geom_point(data = filter(points, !is.na(adj.x)), 
-             mapping = aes(x = pka, y = Keq.C25), color = 'steelblue2', size = ptsz) +
+             mapping = aes(x = pka, y = Keq.C25), color = 'steelblue2', 
+             size = ptsz*5, shape = '*') +
   # Labels: the expression() function allows for sub/superscripts and italics as needed
   labs(x = expression("Imidazole p"*italic(K)*""[a]), 
        y = expression(italic(K)[Carbamate]*", 25"^o*"C"),
@@ -245,7 +256,7 @@ ggplot() +
   # Set the scale and labels of the y-axis. The same can be done with the 
   # x-axis by replacing the 'y' with 'x'
   scale_y_continuous(limits = c(0, 12), breaks = c(0, 3, 6, 9, 12)) +
-  # Apply the presentation theme
+  # Apply the presentation setting
   plot.presentation()
 
 # Relevant plotting info: point and label sizes. For the paper format:
@@ -271,13 +282,14 @@ ggplot() +
             hjust = filter(points, !is.na(adj.x))$hjust,
             size = label.sz) +
   geom_point(data = filter(points, !is.na(adj.x)), 
-             mapping = aes(x = pka, y = Keq.C25), color = 'steelblue2', size = ptsz) +
+             mapping = aes(x = pka, y = Keq.C25), color = 'steelblue2', 
+             size = ptsz*5, shape = '*') +
   # Labels: the expression() function allows for sub/superscripts and italics as needed
   labs(x = expression("Imidazole p"*italic(K)*""[a]), 
        y = expression(italic(K)[Carbamate]*", 25"^o*"C"),
        subtitle = 'Paper Setting', title = 'Equilibrium Constants are Correlated') + 
   scale_y_continuous(limits = c(0, 12), breaks = c(0, 3, 6, 9, 12)) +
-  # Apply the paper theme
+  # Apply the paper setting
   plot.paper()
 
 ```
@@ -307,20 +319,21 @@ ggplot() +
             hjust = filter(points, !is.na(adj.x))$hjust,
             size = label.sz) +
   geom_point(data = filter(points, !is.na(adj.x)), 
-             mapping = aes(x = pka, y = Keq.C25), color = 'steelblue2', size = ptsz) +
+             mapping = aes(x = pka, y = Keq.C25), color = 'steelblue2', 
+             size = ptsz*5, shape = '*') +
   # Labels: the expression() function allows for sub/superscripts and italics as needed
   labs(x = expression("Imidazole p"*italic(K)*""[a]), 
        y = expression(italic(K)[Carbamate]*", 25"^o*"C"),
-       subtitle = 'Paper Theme', title = 'Example: Labeled Scatterplot') + 
+       subtitle = 'Paper Setting', title = 'Example: Labeled Scatterplot') + 
   scale_y_continuous(limits = c(0, 12), breaks = c(0, 3, 6, 9, 12)) +
-  # Apply the paper theme
+  # Apply the paper setting
   plot.paper()
 ggsave(filename = 'Figures/01ScatterExample.pdf', 
-       width = fig.width, height = fig.height, dpi = 300, units = 'in')
+       width = fig.pap.width, height = fig.pap.height, dpi = 300, units = 'in')
 ggsave(filename = 'Figures/01ScatterExample.png', 
-       width = fig.width, height = fig.height, dpi = 300, units = 'in')
+       width = fig.pap.width, height = fig.pap.height, dpi = 300, units = 'in')
 ggsave(filename = 'Figures/01ScatterExample.svg', 
-       width = fig.width, height = fig.height, dpi = 300, units = 'in')
+       width = fig.pap.width, height = fig.pap.height, dpi = 300, units = 'in')
 ```
 
 ```{r Clear data}
@@ -370,7 +383,7 @@ Notes:
 * 'facet_wrap()' leads to a 2-line title, one associated with each of the variables defined for the wrap function. While it does grid nicely according to the variables (eg. the left column is model 1), this is coincidental due to the perfectly symmetric experiment design.
 * All subplots are forced to the same scale, which can be useful for comparison but make visualization difficult (see Test 2-Model 1, for instance).
 * The error bars are as wide as the columns, which make them slightly difficult to see for some, as they look almost like a top border.
-* Only the bottom and left subplots actually have axes. This is more obvious when applying the 'plot.presentation()' or 'plot.paper()' themes, but evident here.
+* Only the bottom and left subplots actually have axes. This is more obvious when applying the 'plot.presentation()' or 'plot.paper()' settings, but evident here.
 * The axes are scaled such that the top and bottom have a spacing of about 5% of the total range of the data. While fine for a scatter plot, for a bar plot, you typically want the bars to start from the bottom.
 
 ## Manipulation of the figure
@@ -379,7 +392,7 @@ Notes:
 * Forcing all subplots to have axes is best done with the 'lemon' package, which includes the functions 'facet_rep_wrap()' and 'facet_rep_grid()'. These work exactly as the 'ggplot2' versions, but can request that tick labels are repeated.
 * Asymmetrically adjusting the y-axis needs to be done with the 'expand = expansion(mult = c(a, b))' setting in the y-scale. The first number of 'mult' variable ('a') is the lower bound expansion (0 if none) and 'b' is the upper bound.
 * Switching the location of the facet label (ie. from the top and right side to the bottom or left side) is done with by using the 'switch' input to 'facet_grid' or 'facet_wrap'. When switching them, I recommend applying 'theme(strip.placement = "outside")' to ensure that they are outside of the axis labels (this is already included in the 'plot.paper()' and 'plot.presentation()' themes).
-* The panels (subplots) may be too close. Adjust them with 'theme(panel.spacing.y = unit(), panel.spacing.x = unit())', where 'unit()' takes a number followed by the units it should refer to. I recommend applying this after setting the theme functions, as the font sizes have a substantial impact on them. It will also look different if the dimensions of the exported figure are different.
+* The panels (subplots) may be too close. Adjust them with 'theme(panel.spacing.y = unit(), panel.spacing.x = unit())', where 'unit()' takes a number followed by the units it should refer to. I recommend applying this after applying the setting functions, as the font sizes have a substantial impact on them. It will also look different if the dimensions of the exported figure are different.
 * 'scale_fill_manual(values, labels)' can be used to set color palettes ('values', See: http://sape.inf.usi.ch/sites/default/files/ggplot2-colour-names.png for a list of built-in color names.) as well as adjust labels manually. When adjusting labels, unless linked together in a list, the labels are listed alphabetically.
 
 ```{r Multi-column plot adjustments}
@@ -446,17 +459,22 @@ ggplot(data) +
   # y scale
   scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +
   labs(title = 'Example: Multi-bar Plot + Faceted Subplots',
-       subtitle = 'Presentation Theme')
+       subtitle = 'Presentation Setting')
+
 ggsave(filename = 'Figures/02BarplotExample.pdf', 
-       width = fig.width*1.3, height = fig.height*1.3, dpi = 300, units = 'in')
+       width = fig.pre.width, height = fig.pre.height, dpi = 300, units = 'in')
 ggsave(filename = 'Figures/02BarplotExample.png', 
-       width = fig.width*1.3, height = fig.height*1.3, dpi = 300, units = 'in')
+       width = fig.pre.width, height = fig.pre.height, dpi = 300, units = 'in')
 ggsave(filename = 'Figures/02BarplotExample.svg', 
-       width = fig.width*1.3, height = fig.height*1.3, dpi = 300, units = 'in')
+       width = fig.pre.width, height = fig.pre.height, dpi = 300, units = 'in')
 
 ```
 
-Note that the 'plot.paper()' addition is before the other 'theme' additions - otherwise, the settings in 'plot.paper()' will overwrite the new theme settings, notably the legend position.
+Note that the 'plot.paper()' addition is before the other 'theme()' additions - otherwise, the settings in 'plot.paper()' will overwrite the new theme settings, notably the legend position.
+
+```{r Clear data2}
+rm(data)
+```
 
 # Heat map
 
@@ -505,10 +523,12 @@ Notes:
 * The 'bins' option controls the number of break points when determining contour lines or colors, not including the minimum. As a result, the number of contour lines or colors you get at the end is actually nbin - 1.
 * Sometimes, you want to stack information on top of/below the heatmap. You can control the transparency of the heatmap with 'alpha'. When 'alpha = 1' (default option), the layer is fully opaque; when 'alpha = 0', the layer is transparent (invisible).
 * Color schemes can be adjusted with 'scale_fill_brewer(palette)'. See https://www.r-graph-gallery.com/38-rcolorbrewers-palettes.html and https://colorbrewer2.org/ for palette codes.
+  * Alternatively, you can create your own gradient with 'scale_fill_gradient()'
+* Sometimes the 'nbin' setting will not properly set the bin widths to capture the highest value in the dataset. This often happens when the distribution function tends towards the extremes. You can alternatively use 'breaks' and give a list of the bin boundaries.
 
 ```{r Example: Manipulating heatmaps and contour plots}
 # Expansion/contraction of the axis boundaries, different alpha values, number of bins
-nbin = 5+1
+nbin = 8+1
 alph = 0.25
 bound.expand = 0
 ggplot(data) +
@@ -518,21 +538,22 @@ ggplot(data) +
                size = 1, color = 'black', bins = nbin) +
   scale_x_continuous(expand = expansion(mult = bound.expand)) +
   scale_y_continuous(expand = expansion(mult = bound.expand)) +
-  labs(subtitle = 'expansion(mult = 0); alpha = 0.25; 5 bins') +
+  labs(subtitle = 'expansion(mult = 0); alpha = 0.25; 8 bins') +
   coord_fixed()
 
 # Adjust all of the set values
-nbin = 8+1
+nbin = 5+1
 alph = 0.75
 bound.expand = 0.5
 ggplot(data) +
   geom_contour_filled(mapping = aes(x = input1, y = input2, z = output2), 
-                      alpha = alph, bins = nbin) +
+    alpha = alph, breaks = seq(from = 0, to = 100, length.out = nbin)) +
   geom_contour(mapping = aes(x = input1, y = input2, z = output2), 
-               size = 1, color = 'black', bins = nbin) +
+    size = 1, color = 'black', breaks = seq(from = 0, to = 100, length.out = nbin)) +
   scale_x_continuous(expand = expansion(mult = bound.expand)) +
   scale_y_continuous(expand = expansion(mult = bound.expand*2)) +
-  labs(subtitle = 'expansion(mult = 0.5) for x, mult = 1 for y; alpha = 0.75; 8 bins') +
+  labs(subtitle = 'expansion(mult = 0.5) for x, mult = 1 for y; 
+   alpha = 0.75; 5 manual bins') +
   coord_fixed()
 
 # Adjust the color scheme
@@ -540,9 +561,9 @@ bound.expand = 0
 alph = 0.5
 ggplot(data) +
   geom_contour_filled(mapping = aes(x = input1, y = input2, z = output2), 
-                      alpha = alph, bins = nbin) +
+    alpha = alph, breaks = seq(from = 0, to = 100, length.out = nbin)) +
   geom_contour(mapping = aes(x = input1, y = input2, z = output2), 
-               size = 1, color = 'black', bins = nbin) +
+    size = 0.5, color = 'black', breaks = seq(from = 0, to = 100, length.out = nbin)) +
   scale_x_continuous(expand = expansion(mult = bound.expand)) +
   scale_y_continuous(expand = expansion(mult = bound.expand)) +
   labs(subtitle = 'Color Scheme Example: Orange to red') +
@@ -563,20 +584,21 @@ Notes:
 * Sometimes, you want to control where the blank spaces happen. This can be done by using 'plot_spacer()' in the location of the blank space.
 * If you wish to hide a legend such as the fill colors, use the function 'guides(fill = FALSE)'. These can also be used to manipulate the appearance of the legends - see: https://aosmith.rbind.io/2020/07/09/ggplot2-override-aes/
 ```{r Combining figures}
+nbin = 6+1; alph = 0.75; ln.wt = 0.5
 ## Simple addition of 2
 g1 = ggplot(data) +
   geom_contour_filled(mapping = aes(x = input1, y = input2, z = output1), 
-                      alpha = 0.75, bins = nbin) +
+          alpha = alph, breaks = seq(from = 0, to = 100, length.out = nbin)) +
   geom_contour(mapping = aes(x = input1, y = input2, z = output1), 
-               size = 1, color = 'black', bins = nbin) +
+               size = ln.wt, color = 'black', bins = nbin) +
   scale_x_continuous(expand = expansion(mult = bound.expand)) +
   scale_y_continuous(expand = expansion(mult = bound.expand)) +
   coord_fixed()
 g2 = ggplot(data) +
   geom_contour_filled(mapping = aes(x = input1, y = input2, z = output2), 
-                      alpha = 0.75, bins = nbin) +
+          alpha = alph, breaks = seq(from = 0, to = 100, length.out = nbin)) +
   geom_contour(mapping = aes(x = input1, y = input2, z = output2), 
-               size = 1, color = 'black', bins = nbin) +
+               size = ln.wt, color = 'black', bins = nbin) +
   scale_x_continuous(expand = expansion(mult = bound.expand)) +
   scale_y_continuous(expand = expansion(mult = bound.expand)) +
   coord_fixed()
@@ -588,25 +610,27 @@ g1 + g2 + plot_layout(guides = "collect")
 ## 3 Figures with a spacer
 g1 = ggplot(data) +
   geom_contour(mapping = aes(x = input1, y = input2, z = output1), 
-               size = 1, color = 'red', bins = nbin) +
+               size = ln.wt, color = 'red', 
+               breaks = seq(from = 0, to = 100, length.out = nbin)) +
   geom_contour(mapping = aes(x = input1, y = input2, z = output2), 
-               size = 1, color = 'black', bins = nbin) +
+               size = ln.wt, color = 'black', 
+               breaks = seq(from = 0, to = 100, length.out = nbin)) +
   scale_x_continuous(expand = expansion(mult = bound.expand)) +
   scale_y_continuous(expand = expansion(mult = bound.expand)) +
   coord_fixed()
 g2 = ggplot(data) +
   geom_contour_filled(mapping = aes(x = input1, y = input2, z = output1), 
-                      alpha = 0.75, bins = nbin) +
+          alpha = alph, breaks = seq(from = 0, to = 100, length.out = nbin)) +
   scale_x_continuous(expand = expansion(mult = bound.expand)) +
   scale_y_continuous(expand = expansion(mult = bound.expand)) +
-  coord_fixed() +
+  coord_fixed() + labs(fill = 'Output 1') +
   scale_fill_brewer(palette = 'Reds')
 g3 = ggplot(data) +
   geom_contour_filled(mapping = aes(x = input1, y = input2, z = output2), 
-                      alpha = 0.75, bins = nbin) +
+          alpha = alph, breaks = seq(from = 0, to = 100, length.out = nbin)) +
   scale_x_continuous(expand = expansion(mult = bound.expand)) +
   scale_y_continuous(expand = expansion(mult = bound.expand)) +
-  coord_fixed() +
+  coord_fixed() + labs(fill = 'Output 2') +
   scale_fill_brewer(palette = 'Greys')
 # Example with just setting the number of rows
 g2 + g3 + g1 + plot_layout(guides = "collect", nrow = 2)
@@ -614,39 +638,34 @@ g2 + g3 + g1 + plot_layout(guides = "collect", nrow = 2)
 g2 + g3 + plot_spacer() + g1 + plot_layout(guides = "collect", nrow = 2)
 
 ## Hiding a legend, paper presentation mode.
-g1 = ggplot(data) +
-  geom_contour(mapping = aes(x = input1, y = input2, z = output1), 
-               size = 1, color = 'red', bins = nbin) +
-  geom_contour(mapping = aes(x = input1, y = input2, z = output2), 
-               size = 1, color = 'black', bins = nbin) +
-  scale_x_continuous(expand = expansion(mult = bound.expand)) +
-  scale_y_continuous(expand = expansion(mult = bound.expand)) +
-  coord_fixed() + plot.paper()
+# same g1, just add the paper setting
+g1 = g1 + plot.paper()
 g2 = ggplot(data) +
   geom_contour_filled(mapping = aes(x = input1, y = input2, z = output1), 
-                      alpha = 0.75, bins = nbin) +
+          alpha = alph, breaks = seq(from = 0, to = 100, length.out = nbin)) +
   scale_x_continuous(expand = expansion(mult = bound.expand)) +
   scale_y_continuous(expand = expansion(mult = bound.expand)) +
   coord_fixed() +
   scale_fill_brewer(palette = 'Reds') + guides(fill = FALSE) + plot.paper()
 g3 = ggplot(data) +
   geom_contour_filled(mapping = aes(x = input1, y = input2, z = output2), 
-                      alpha = 0.75, bins = nbin) +
+          alpha = alph, breaks = seq(from = 0, to = 100, length.out = nbin)) +
   scale_x_continuous(expand = expansion(mult = bound.expand)) +
   scale_y_continuous(expand = expansion(mult = bound.expand)) +
-  coord_fixed() +
+  coord_fixed() + labs(fill = 'Legend title') +
   scale_fill_brewer(palette = 'Greys') + plot.paper()
 # As before, but the red legend has been eliminated. The plot annotation
 # function allows for a total figure title; otherwise, the title is
 # specific to a single subplot
 g2 + g3 + plot_spacer() + g1 + plot_layout(guides = "collect", nrow = 2) +
-  plot_annotation(subtitle = 'Example Heatmap/Contour + Patchwork')
+  plot_annotation(title = 'Example Heatmap/Contour + Patchwork',
+                  subtitle = 'Paper setting')
 ggsave(filename = 'Figures/03HeatmapExample.pdf', 
-       width = fig.width, height = fig.height, dpi = 300, units = 'in')
+       width = fig.pap.width, height = fig.pap.height, dpi = 300, units = 'in')
 ggsave(filename = 'Figures/03HeatmapExample.png', 
-       width = fig.width, height = fig.height, dpi = 300, units = 'in')
+       width = fig.pap.width, height = fig.pap.height, dpi = 300, units = 'in')
 ggsave(filename = 'Figures/03HeatmapExample.svg', 
-       width = fig.width, height = fig.height, dpi = 300, units = 'in')
+       width = fig.pap.width, height = fig.pap.height, dpi = 300, units = 'in')
 
 rm(g1, g2, g3)
 ```
